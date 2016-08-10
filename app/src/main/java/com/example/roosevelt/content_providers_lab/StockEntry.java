@@ -56,4 +56,6 @@ public class StockEntry {
     public void setSymbol(String mSymbol) {
         this.mSymbol = mSymbol;
     }
+
+
 }
