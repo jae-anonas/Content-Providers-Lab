@@ -21,7 +21,7 @@ import okhttp3.Response;
 public class MarkItAsyncTask extends AsyncTask<String, Void, Stock[]> {
 
     public interface AsyncResponse {
-        void processFinish(String output);
+        void processFinish(Stock output);
     }
 
     public AsyncResponse delegate = null;
@@ -57,10 +57,10 @@ public class MarkItAsyncTask extends AsyncTask<String, Void, Stock[]> {
     protected void onPostExecute(Stock[] stocksRootObject) {
         super.onPostExecute(stocksRootObject);
 //        List mStockList = new LinkedList<>(Arrays.asList(stocksRootObject));
-        if (stocksRootObject != null)
-            delegate.processFinish(stocksRootObject[0].getName());
+        if (stocksRootObject != null && stocksRootObject.length > 0)
+            delegate.processFinish(stocksRootObject[0]);
         else
-            delegate.processFinish("");
+            delegate.processFinish(null);
 
 
 //        Toast.makeText(, "Got here! Add here, i guess size = " + mStockList.size(), Toast.LENGTH_SHORT).show();

@@ -23,6 +23,7 @@ import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.roosevelt.content_providers_lab.content_provider.StocksContract;
@@ -43,9 +44,8 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity{
     private ContentResolver mContentResolver;
-    private RecyclerView mRecyclerView;
     private ListView mListView;
-//    private StockCardRecyclerViewAdapter adapter;
+
     private StockCursorAdapter adapter;
     private LinkedList<Stock> mStockList;
     private MarkItAsyncTask mMarkItAsyncTask;
@@ -80,8 +80,8 @@ public class MainActivity extends AppCompatActivity{
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
                 showAddDialog();
             }
         });
@@ -135,25 +135,40 @@ public class MainActivity extends AppCompatActivity{
                 final String stockQty = txtStockQty.getText().toString();
 
                 //TODO check symbol through API call
-                ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+                ConnectivityManager connMgr =
+                        (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
                 if(networkInfo != null && networkInfo.isConnected()){
-                    if (mMarkItAsyncTask != null && (mMarkItAsyncTask.getStatus() != AsyncTask.Status.FINISHED)) {
+                    if (mMarkItAsyncTask != null &&
+                            (mMarkItAsyncTask.getStatus() != AsyncTask.Status.FINISHED)) {
                         mMarkItAsyncTask.cancel(true);
                     }
                     mMarkItAsyncTask = new MarkItAsyncTask(new MarkItAsyncTask.AsyncResponse() {
                         @Override
-                        public void processFinish(String output) {
+                        public void processFinish(Stock output) {
                             //add stock here
-                            if (!output.equals("")){
+                            if (output != null){
                                 ContentValues values = new ContentValues();
-                                values.put(StocksContract.Stocks.COL_SYMBOL, stockSymbol);
-                                values.put(StocksContract.Stocks.COL_QUANTITY, stockQty);
-                                values.put(StocksContract.Stocks.COL_FULL_NAME, output); //from API Call
+                                values.put(StocksContract.Stocks.COL_SYMBOL,
+                                        output.getSymbol());//from API Call
+                                values.put(StocksContract.Stocks.COL_QUANTITY,
+                                        stockQty);
+                                values.put(StocksContract.Stocks.COL_FULL_NAME,
+                                        output.getName()); //from API Call
+                                values.put(StocksContract.Stocks.COL_EXCHANGE,
+                                        output.getExchange());//from API Call
 
                                 addStock(values);
+
                                 adapter.notifyDataSetChanged();
                                 adapter.swapCursor(fetchStocks());
+
+                                Toast.makeText(MainActivity.this, "Stock added to portfolio!",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                            else {
+                                Toast.makeText(MainActivity.this, "That symbol does not exist",
+                                        Toast.LENGTH_SHORT).show();
                             }
 
                         }
@@ -163,30 +178,10 @@ public class MainActivity extends AppCompatActivity{
                 else {
                     Toast.makeText(MainActivity.this, "No network connection detected", Toast.LENGTH_SHORT).show();
                 }
-
-//                if(mStockList != null && mStockList.size() > 0){
-//                    Toast.makeText(MainActivity.this, "Size of list is " + mStockList.size(), Toast.LENGTH_SHORT).show();
-//                    //add stock here
-//                    ContentValues values = new ContentValues();
-//                    values.put(StocksContract.Stocks.COL_SYMBOL, stockSymbol);
-//                    values.put(StocksContract.Stocks.COL_QUANTITY, stockQty);
-//                    values.put(StocksContract.Stocks.COL_FULL_NAME, mStockList.get(0).getName()); //from API Call
-//
-//                    addStock(values);
-//
-//                }
-
-                //TODO refresh adapter list
-//                adapter.setStockEntryList(getListFromCursor(fetchStocks()));
-//                adapter.changeCursor(fetchStocks());
-//                adapter.notifyDataSetChanged();
-
-                Toast.makeText(MainActivity.this, "adding new stock!", Toast.LENGTH_SHORT).show();
             }
         })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                //pass
             }
         });
         AlertDialog b = dialogBuilder.create();
@@ -199,53 +194,4 @@ public class MainActivity extends AppCompatActivity{
     }
 
 //
-//    public class MarkItAsyncTask extends AsyncTask<String, Void, Stock[]> {
-//
-//        @Override
-//        protected Stock[] doInBackground(String... strings) {
-//            OkHttpClient client = new OkHttpClient();
-//            Stock[] stockObject = null;
-//
-//            Request request = new Request.Builder()
-//                    .url(strings[0])
-//                    .build();
-//
-//            try{
-//                Response response = client.newCall(request).execute();
-//                Gson gson = new Gson();
-//                stockObject = gson.fromJson(response.body().string(),
-//                        Stock[].class);
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//            return stockObject != null ? stockObject : null;
-//
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Stock[] stocksRootObject) {
-//            super.onPostExecute(stocksRootObject);
-//            mStockList.clear();
-//            mStockList = new LinkedList<>(Arrays.asList(stocksRootObject));
-//
-//            Toast.makeText(MainActivity.this, "Got here! Add here, i guess size = " + mStockList.size(), Toast.LENGTH_SHORT).show();
-//
-//        }
-//    }
-
-/*
-
-  public interface AsyncResponse {
-        void processFinish(String output);
-  }
-
-  public AsyncResponse delegate = null;
-
-    public MyAsyncTask(AsyncResponse delegate){
-        this.delegate = delegate;
-    }
- */
-
 }

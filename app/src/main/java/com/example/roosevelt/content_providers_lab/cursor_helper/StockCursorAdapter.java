@@ -35,14 +35,19 @@ public class StockCursorAdapter extends CursorAdapter {
     public void bindView(View view, final Context context, Cursor cursor) {
         TextView txtName = (TextView) view.findViewById(R.id.txtName);
         TextView txtQty = (TextView) view.findViewById(R.id.txtQty);
+        TextView txtSymbol = (TextView) view.findViewById(R.id.txtSymbol);
+        TextView txtExchange = (TextView) view.findViewById(R.id.txtExchange);
 
         final long id = cursor.getLong(cursor.getColumnIndex(StocksContract.Stocks._ID));
         String name = cursor.getString(cursor.getColumnIndex(StocksContract.Stocks.COL_FULL_NAME));
-        final String symbol = cursor.getString(cursor.getColumnIndex(StocksContract.Stocks.COL_SYMBOL));
+        String symbol = cursor.getString(cursor.getColumnIndex(StocksContract.Stocks.COL_SYMBOL));
+        String exchange = cursor.getString(cursor.getColumnIndex(StocksContract.Stocks.COL_EXCHANGE));
         int qty = cursor.getInt(cursor.getColumnIndex(StocksContract.Stocks.COL_QUANTITY));
 
-        txtName.setText(name);
-        txtQty.setText(String.valueOf(qty));
+        txtName.setText("Company: " + name);
+        txtQty.setText("Quantity: " + String.valueOf(qty));
+        txtSymbol.setText("Symbol: " + symbol);
+        txtExchange.setText("Exchange: " + exchange);
 
 //        view.setOnClickListener(new View.OnClickListener() {
 //            @Override
